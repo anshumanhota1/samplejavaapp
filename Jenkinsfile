@@ -89,57 +89,57 @@ pipeline {
         }
     }
 
-    post {
+//     post {
 
-        success {
-            emailext(
-                to: 'anshumanhota1@gmail.com',
-                subject: "SUCCESS: ${JOB_NAME} - Build #${BUILD_NUMBER}",
-                body: """
-Hello,
+//         success {
+//             emailext(
+//                 to: 'anshumanhota1@gmail.com',
+//                 subject: "SUCCESS: ${JOB_NAME} - Build #${BUILD_NUMBER}",
+//                 body: """
+// Hello,
 
-Your Jenkins Maven pipeline completed successfully.
+// Your Jenkins Maven pipeline completed successfully.
 
-Job: ${JOB_NAME}
-Build Number: ${BUILD_NUMBER}
-Status: SUCCESS
-Repository: https://github.com/anshumanhota1/samplejavaapp.git
-Build URL: ${BUILD_URL}
+// Job: ${JOB_NAME}
+// Build Number: ${BUILD_NUMBER}
+// Status: SUCCESS
+// Repository: https://github.com/anshumanhota1/samplejavaapp.git
+// Build URL: ${BUILD_URL}
 
-Completed stages:
-1. Checkout
-2. Compile
-3. PMD Code Review
-4. Unit Testing
-5. JaCoCo Code Coverage
-6. Package
+// Completed stages:
+// 1. Checkout
+// 2. Compile
+// 3. PMD Code Review
+// 4. Unit Testing
+// 5. JaCoCo Code Coverage
+// 6. Package
 
-Regards,
-Jenkins CI/CD
-"""
-            )
-        }
+// Regards,
+// Jenkins CI/CD
+// """
+//             )
+//         }
 
-        failure {
-            emailext(
-                to: 'anshumanhota1@gmail.com',
-                subject: "FAILURE: ${JOB_NAME} - Build #${BUILD_NUMBER}",
-                body: """
-Hello,
+//         failure {
+//             emailext(
+//                 to: 'anshumanhota1@gmail.com',
+//                 subject: "FAILURE: ${JOB_NAME} - Build #${BUILD_NUMBER}",
+//                 body: """
+// Hello,
 
-Your Jenkins Maven pipeline has failed.
+// Your Jenkins Maven pipeline has failed.
 
-Job: ${JOB_NAME}
-Build Number: ${BUILD_NUMBER}
-Status: FAILURE
-Build URL: ${BUILD_URL}
+// Job: ${JOB_NAME}
+// Build Number: ${BUILD_NUMBER}
+// Status: FAILURE
+// Build URL: ${BUILD_URL}
 
-Please check Jenkins Console Output for details.
+// Please check Jenkins Console Output for details.
 
-Regards,
-Jenkins CI/CD
-"""
-            )
-        }
-    }
+// Regards,
+// Jenkins CI/CD
+// """
+//             )
+//         }
+//     }
 }
