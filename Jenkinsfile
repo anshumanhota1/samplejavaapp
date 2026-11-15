@@ -34,7 +34,7 @@ pipeline {
 
                     recordIssues(
                         enabledForFailure: true,
-                        tools: pmdParser(pattern: '**/target/pmd.xml')
+                        tool: pmdParser(pattern: '**/target/pmd.xml')
                     )
                 }
             }
