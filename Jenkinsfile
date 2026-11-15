@@ -4,23 +4,28 @@ pipeline {
 
     stages {
 
-        stage('compile') {
+        stage('Checkout') {
             steps {
-                echo 'compiling..'
+                echo 'Checking out source code...'
 
                 git url: 'https://github.com/anshumanhota1/samplejavaapp.git'
-
-                sh script: 'mvn compile'
             }
         }
 
-        stage('codereview-pmd') {
+        stage('Compile') {
+            steps {
+                echo 'Compiling source code...'
+
+                sh 'mvn compile'
+            }
+        }
+
+        stage('CodeReview-PMD') {
             steps {
                 echo 'Starting PMD Code Review...'
 
                 sh 'mvn -P metrics pmd:pmd'
 
-                // Verify PMD report generation
                 sh 'test -f target/pmd.xml'
             }
 
@@ -30,61 +35,115 @@ pipeline {
 
                     recordIssues(
                         enabledForFailure: true,
-                        tool: pmdParser(
+                        tools: [[
+                            parser: 'PMD',
                             pattern: '**/target/pmd.xml'
-                        )
+                        ]]
                     )
                 }
             }
         }
 
-        stage('unit-test') {
+        stage('Unit-Test') {
             steps {
-                echo 'unittest..'
+                echo 'Executing unit tests...'
 
-                sh script: 'mvn test'
+                sh 'mvn test'
             }
 
             post {
-                success {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-
-        stage('codecoverate') {
-            steps {
-                echo 'codecoverage..'
-
-                sh script: 'mvn cobertura:cobertura -Dcobertura.report.format=xml'
-            }
-
-            post {
-                success {
-                    cobertura(
-                        autoUpdateHealth: false,
-                        autoUpdateStability: false,
-                        coberturaReportFile: 'target/site/cobertura/coverage.xml',
-                        conditionalCoverageTargets: '70, 0, 0',
-                        failUnhealthy: false,
-                        failUnstable: false,
-                        lineCoverageTargets: '80, 0, 0',
-                        maxNumberOfBuilds: 0,
-                        methodCoverageTargets: '80, 0, 0',
-                        onlyStable: false,
-                        sourceEncoding: 'ASCII',
-                        zoomCoverageChart: false
+                always {
+                    junit(
+                        testResults: 'target/surefire-reports/*.xml',
+                        allowEmptyResults: true
                     )
                 }
             }
         }
 
-        stage('package') {
+        stage('Code-Coverage') {
             steps {
-                echo 'package......'
+                echo 'Generating JaCoCo code coverage report...'
 
-                sh script: 'mvn package'
+                sh 'mvn jacoco:report'
+
+                sh 'test -f target/site/jacoco/jacoco.xml'
             }
+
+            post {
+                success {
+                    echo 'Publishing JaCoCo coverage results...'
+
+                    recordCoverage(
+                        tools: [[
+                            parser: 'JACOCO',
+                            pattern: 'target/site/jacoco/jacoco.xml'
+                        ]]
+                    )
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                echo 'Packaging application...'
+
+                sh 'mvn package'
+            }
+        }
+    }
+
+    post {
+
+        success {
+            emailext(
+                to: 'anshumanhota1@gmail.com',
+                subject: "SUCCESS: ${JOB_NAME} - Build #${BUILD_NUMBER}",
+                body: """
+Hello,
+
+Your Jenkins Maven pipeline completed successfully.
+
+Job: ${JOB_NAME}
+Build Number: ${BUILD_NUMBER}
+Status: SUCCESS
+Repository: https://github.com/anshumanhota1/samplejavaapp.git
+Build URL: ${BUILD_URL}
+
+Completed stages:
+1. Checkout
+2. Compile
+3. PMD Code Review
+4. Unit Testing
+5. JaCoCo Code Coverage
+6. Package
+
+Regards,
+Jenkins CI/CD
+"""
+            )
+        }
+
+        failure {
+            emailext(
+                to: 'anshumanhota1@gmail.com',
+                subject: "FAILURE: ${JOB_NAME} - Build #${BUILD_NUMBER}",
+                body: """
+Hello,
+
+Your Jenkins Maven pipeline has failed.
+
+Job: ${JOB_NAME}
+Build Number: ${BUILD_NUMBER}
+Status: FAILURE
+Build URL: ${BUILD_URL}
+
+Please check Jenkins Console Output for details.
+
+Regards,
+Jenkins CI/CD
+"""
+            )
         }
     }
 }
