@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -35,10 +34,9 @@ pipeline {
 
                     recordIssues(
                         enabledForFailure: true,
-                        tools: [[
-                            parser: 'PMD',
-                            pattern: '**/target/pmd.xml'
-                        ]]
+                        tools: [
+                            pmd(pattern: '**/target/pmd.xml')
+                        ]
                     )
                 }
             }
